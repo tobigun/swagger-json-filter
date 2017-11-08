@@ -14,6 +14,10 @@ module.exports = function (inputJson, options) {
     }
 
     const paths = inputJson.paths;
+
+    if (options.findTags) {
+		return findAllTags(paths);
+    }
     if (options.includePaths) {
         removeUnwantedKeys(paths, pathRegex);
     }
@@ -61,6 +65,18 @@ function removeUnwantedTags(objectToFilter, tagRegex) {
             delete objectToFilter[key];
         }
     }
+}
+
+function findAllTags(objectToFilter) {
+    let tags = new Set();
+    for (const key in objectToFilter) {
+        for (const ops in objectToFilter[key]) {
+            if (objectToFilter[key][ops].tags) {
+				objectToFilter[key][ops].tags.forEach(v=>tags.add(v))
+            }
+        }
+    }
+	return Array.from(tags);
 }
 
 function saveDefinitions(definitionRegex, definitionsMap, whiteList, inputJson) {
