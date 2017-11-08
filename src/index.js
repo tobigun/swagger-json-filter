@@ -3,6 +3,7 @@ const flatten = require('flat');
 module.exports = function (inputJson, options) {
     const pathRegex = new RegExp(options.includePaths);
     const definitionRegex = new RegExp(options.includeDefinitions);
+    const tagRegex = new RegExp(options.includeTags);
     inputJson = JSON.parse(inputJson);
 
     let definitionsMap = {};
@@ -13,7 +14,12 @@ module.exports = function (inputJson, options) {
     }
 
     const paths = inputJson.paths;
-    removeUnwantedKeys(paths, pathRegex);
+    if (options.includePaths) {
+        removeUnwantedKeys(paths, pathRegex);
+    }
+    if (options.includeTags) {
+        removeUnwantedTags(paths, tagRegex);
+    }
     let whiteList = {};
     if (options.includeDefinitions) {
         saveDefinitions(definitionRegex, definitionsMap, whiteList, inputJson);
@@ -28,6 +34,30 @@ module.exports = function (inputJson, options) {
 function removeUnwantedKeys(objectToFilter, keyRegex) {
     for (const key in objectToFilter) {
         if (!keyRegex.test(key)) {
+            delete objectToFilter[key];
+        }
+    }
+}
+
+function removeUnwantedTags(objectToFilter, tagRegex) {
+    for (const key in objectToFilter) {
+        let keepKey = false;
+        for (const ops in objectToFilter[key]) {
+            let keepOp = false;
+            let tags = objectToFilter[key][ops].tags;
+            if (tags) {
+                tags.forEach(function(tag) {
+                    if (tagRegex.test(tag)) {
+                        keepOp = true;
+                        keepKey = true;
+                    }
+                });
+            }
+            if (!keepOp) {
+                delete objectToFilter[key][ops];
+            }
+        }
+        if (!keepKey) {
             delete objectToFilter[key];
         }
     }

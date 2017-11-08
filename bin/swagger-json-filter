@@ -16,6 +16,7 @@ function getProgram() {
     let program = require('commander');
     program.option('-p, --include-paths <include-paths>', 'Keep only paths matching the given JavaScript regex')
         .option('-d, --include-definitions <include-definitions>', 'Keep only definitions matching the given JavaScript regex')
+        .option('-t, --include-tags <include-tags>', 'Keep only tags matching the given JavaScript regex')
         .parse(process.argv);
     return program;
 }
